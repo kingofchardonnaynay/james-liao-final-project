@@ -1,7 +1,7 @@
 import psycopg2
 import os
-from psycopg2 import OperationalError
-from ocr_utils import extract_xxx_from_ocr, extract_yyy_from_ocr, handle_aaaxxx_format, handle_qqq_format
+from src.psycopg2 import OperationalError
+from src.ocr_utils import extract_xxx_from_ocr, extract_yyy_from_ocr, handle_aaaxxx_format, handle_qqq_format
 import re
 
 # --- LOAD POSTGRESQL CONNECTION ---

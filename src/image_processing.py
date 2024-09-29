@@ -109,7 +109,7 @@ def draw_bounding_box_white(image_bgr, model):
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if not contours:
-        return None, "Contour cannot be found."
+        return None, "Contour cannot be found.", None
 
     largest_contour = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(largest_contour)
@@ -143,7 +143,7 @@ def draw_bounding_box_white(image_bgr, model):
 
     # Safety net for missing OCR results
     if not final_ocr_result:
-        return None, "Text cannot be found."
+        return None, "Text cannot be found.", None
     
     # --- Name ROI ---
     name_roi_height = text_roi_height
@@ -174,7 +174,7 @@ def draw_bounding_box_white(image_bgr, model):
 
     # Safety net for missing model prediction
     if not symbol_prediction:
-        return None, "Contour cannot be found."
+        return None, "Contour cannot be found.", None
 
     return symbol_prediction, final_ocr_result, name_ocr_result
 
@@ -263,13 +263,13 @@ def draw_bounding_boxes(image_rgb, threshold_value, model):
 
         # Safety net for missing model prediction
         if not symbol_prediction:
-            return None, "Contour cannot be found."
+            return None, "Contour cannot be found.", None
 
         return symbol_prediction, final_ocr_result, name_ocr_result
 
     else:
         print("No contours found.")
-        return image_rgb, None
+        return image_rgb, None, None
 
 
 

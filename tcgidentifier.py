@@ -227,7 +227,7 @@ def draw_bounding_box_white(image_bgr, model):
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if not contours:
-        return None, "Contour cannot be found."
+        return None, "Contour cannot be found.", None
 
     largest_contour = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(largest_contour)
@@ -261,7 +261,7 @@ def draw_bounding_box_white(image_bgr, model):
 
     # Safety net for missing OCR results
     if not final_ocr_result:
-        return None, "Text cannot be found."
+        return None, "Text cannot be found.", None
     
     # --- Name ROI ---
     name_roi_height = text_roi_height
@@ -292,7 +292,7 @@ def draw_bounding_box_white(image_bgr, model):
 
     # Safety net for missing model prediction
     if not symbol_prediction:
-        return None, "Contour cannot be found."
+        return None, "Contour cannot be found.", None
 
     return symbol_prediction, final_ocr_result, name_ocr_result
 
@@ -381,13 +381,13 @@ def draw_bounding_boxes(image_rgb, threshold_value, model):
 
         # Safety net for missing model prediction
         if not symbol_prediction:
-            return None, "Contour cannot be found."
+            return None, "Contour cannot be found.", None
 
         return symbol_prediction, final_ocr_result, name_ocr_result
 
     else:
         print("No contours found.")
-        return image_rgb, None
+        return image_rgb, None, None
 
 
 
@@ -782,8 +782,13 @@ def upload_and_process():
 # Function to handle text-only processing
 def process_text_only():
     # Extract the image from session state
-    image_rgb = st.session_state.image_rgb 
-    text_prediction, name_result = bounding_box_roi(image_rgb, model)[1:3]
+    image_rgb = st.session_state.get("image_rgb", None)
+    if image_rgb is None:
+        st.write("Error: No image available in session state.")
+        return
+
+    # Extract text_prediction and name_result from bounding_box_roi function
+    _, text_prediction, name_result = bounding_box_roi(image_rgb, model)
 
     # Debugging: Check if text_prediction is empty
     if not text_prediction:
@@ -796,13 +801,13 @@ def process_text_only():
     result = get_set_and_card_info(text_prediction)
 
     # Check for valid results
-    if result is None:
+    if result is None or not isinstance(result, dict):
         st.write("No information found for the provided text.")
         return
 
     # Extract relevant data from the result
     possible_ids = result.get("possible_ids", [])
-    ocr_result = result.get("OCR_Result")
+    ocr_result = result.get("OCR_Result", "")
 
     # Handle cases for QQQ format or multiple possible sets
     if len(possible_ids) > 1 or (ocr_result.isdigit() and len(ocr_result) == 3):
@@ -841,6 +846,9 @@ def process_text_only():
                 except psycopg2.errors.UndefinedTable:
                     st.write(f"Table for Set: {set_name} (ID: {set_id}) cannot be found.")
                     continue
+                except Exception as e:
+                    st.write(f"Error querying the database: {str(e)}")
+                    continue
             
             # Select the longest matched name
             if matched_names:
@@ -854,8 +862,6 @@ def process_text_only():
         st.write("No matching cards found for the given text.")
 
     st.info("These are all possible matches. Please upload another card.")
-
-
 
 
 # Ensure that the session state is initialized

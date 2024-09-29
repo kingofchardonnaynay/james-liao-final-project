@@ -2,10 +2,10 @@ import streamlit as st
 from PIL import Image
 import cv2
 import numpy as np
-from db_utils import log_user_activity, get_card_info, get_set_and_card_info, get_read_only_connection, get_logging_connection
-from model_utils import load_symbol_model, load_class_names
-from image_processing import bounding_box_roi
-from ocr_utils import extract_xxx_from_ocr
+from src.db_utils import log_user_activity, get_card_info, get_set_and_card_info, get_read_only_connection, get_logging_connection
+from src.model_utils import load_symbol_model, load_class_names
+from src.image_processing import bounding_box_roi
+from src.ocr_utils import extract_xxx_from_ocr
 import psycopg2
 
 model = load_symbol_model()

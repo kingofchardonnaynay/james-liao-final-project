@@ -2,11 +2,12 @@ import streamlit as st
 from PIL import Image
 import cv2
 import numpy as np
-from src.db_utils import log_user_activity, get_card_info, get_set_and_card_info, get_read_only_connection, get_logging_connection
-from src.model_utils import load_symbol_model, load_class_names
-from src.image_processing import bounding_box_roi
-from src.ocr_utils import extract_xxx_from_ocr
+from db_utils import log_user_activity, get_card_info, get_set_and_card_info, get_read_only_connection, get_logging_connection
+from model_utils import load_symbol_model, load_class_names
+from image_processing import bounding_box_roi
+from ocr_utils import extract_xxx_from_ocr
 import psycopg2
+import re
 
 model = load_symbol_model()
 load_class_names()
@@ -99,6 +100,10 @@ def process_image_with_symbol_and_text(image_rgb, model):
     else:
         st.write("Card information could not be found.")
 
+# Function to remove non-letter characters from a string
+def clean_name(name):
+    return re.sub(r'[^a-zA-Z]', '', name)
+
 # Streamlit UI for processing the image
 def upload_and_process():
     image_rgb = upload_image()
@@ -125,6 +130,14 @@ def process_text_only():
 
     st.write(f"Text Prediction: {text_prediction}")
 
+    # Clean name_result to remove any non-letter characters
+    cleaned_name_result = [clean_name(name) for name in name_result]
+    
+    # Ensure cleaned_name_result is not empty after cleaning
+    if not cleaned_name_result or all(name == '' for name in cleaned_name_result):
+        st.write("Error: No valid names found after cleaning name_result.")
+        return
+
     # Use the get_set_and_card_info function to process the text_prediction
     result = get_set_and_card_info(text_prediction)
 
@@ -142,7 +155,7 @@ def process_text_only():
         if ocr_result.isdigit() and len(ocr_result) == 3:
             # We have QQQ format, compare against name_result
             st.write("Processing QQQ format...")
-            longest_name = max(name_result, key=len)
+            longest_name = max(cleaned_name_result, key=len)
             if longest_name in result.get("Card", ""):
                 st.markdown(f"Matched Card: **{longest_name}** in {result['Card']}")
         else:
@@ -166,8 +179,8 @@ def process_text_only():
                         card_name = card_result[0]
                         st.write(f"Set Name: **{set_name}**, Card Name: **{card_name}**")
                         
-                        # Check each name in name_result against card_name
-                        for name in name_result:
+                        # Check each cleaned name in cleaned_name_result against card_name
+                        for name in cleaned_name_result:
                             if name in card_name:
                                 matched_names.append((name, card_name, set_name))
                         

@@ -1,9 +1,23 @@
 import json
 import gcsfs
+import requests
+import os
+import streamlit as st
 from tensorflow.keras.models import load_model
 
 # --- LOAD MODEL ---
 def load_symbol_model():
+    # Retrieve Google Cloud credentials from Streamlit secrets
+    gcp_credentials = st.secrets["gcp"]
+    
+    # Write the credentials to a temporary file
+    credentials_json_path = "/tmp/gcp_credentials.json"
+    with open(credentials_json_path, "w") as f:
+        json.dump(gcp_credentials, f)
+
+    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_json_path
+    
     # Set up Google Cloud Storage FileSystem
     fs = gcsfs.GCSFileSystem()
 

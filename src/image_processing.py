@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from ocr_utils import ocr_preprocessing, perform_ocr_easyocr, process_ocr_results
-from model_utils import load_class_names, load_symbol_model
+from src.ocr_utils import ocr_preprocessing, perform_ocr_easyocr, process_ocr_results
+from src.model_utils import load_class_names, load_symbol_model
 import streamlit as st
 
 model = load_symbol_model()

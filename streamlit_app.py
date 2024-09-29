@@ -110,8 +110,13 @@ def upload_and_process():
 # Function to handle text-only processing
 def process_text_only():
     # Extract the image from session state
-    image_rgb = st.session_state.image_rgb 
-    text_prediction, name_result = bounding_box_roi(image_rgb, model)[1:3]
+    image_rgb = st.session_state.get("image_rgb", None)
+    if image_rgb is None:
+        st.write("Error: No image available in session state.")
+        return
+
+    # Extract text_prediction and name_result from bounding_box_roi function
+    _, text_prediction, name_result = bounding_box_roi(image_rgb, model)
 
     # Debugging: Check if text_prediction is empty
     if not text_prediction:
@@ -124,13 +129,13 @@ def process_text_only():
     result = get_set_and_card_info(text_prediction)
 
     # Check for valid results
-    if result is None:
+    if result is None or not isinstance(result, dict):
         st.write("No information found for the provided text.")
         return
 
     # Extract relevant data from the result
     possible_ids = result.get("possible_ids", [])
-    ocr_result = result.get("OCR_Result")
+    ocr_result = result.get("OCR_Result", "")
 
     # Handle cases for QQQ format or multiple possible sets
     if len(possible_ids) > 1 or (ocr_result.isdigit() and len(ocr_result) == 3):
@@ -168,6 +173,9 @@ def process_text_only():
                         
                 except psycopg2.errors.UndefinedTable:
                     st.write(f"Table for Set: {set_name} (ID: {set_id}) cannot be found.")
+                    continue
+                except Exception as e:
+                    st.write(f"Error querying the database: {str(e)}")
                     continue
             
             # Select the longest matched name

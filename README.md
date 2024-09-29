@@ -13,28 +13,30 @@ The **Pokemon TCG Identifier Project** is an application designed to identify Po
 The project uses advanced image processing and machine learning techniques, including convolutional neural networks (CNNs) and Optical Character Recognition (OCR), to extract key information from each card.
 
 ## App Link
-You can access the live application here: [Pokemon TCG Identifier](#)
-
-(Note: Replace `#` with the actual URL of your deployed app)
+The application is hosted locally as the model is too large for github.
+model_utils.py has a link to the model's location on Google Cloud but authentication has been a problem.
 
 ## Features
 - Upload a Pokémon TCG card image and receive detailed information about the card.
 - Uses CNNs to predict the set symbol of the card.
 - Applies OCR to extract the card’s collector number and total card count.
+- Two methods are attempted to identify the card: a combination of set symbol + collector number, or simply using the collector number
 - Interactive web interface built with Streamlit.
-- Supports identifying cards from multiple sets, with high accuracy.
-- Allows users to confirm the identified card or attempt another search if the result is incorrect.
+- Supports identifying cards from multiple sets.
+
 
 ## Files and Directories
 Here's an overview of the main files and directories used in the project:
 
-- `app.py`: The main file to run the Streamlit app.
-- `models/`: Directory containing pre-trained models for set symbol recognition.
-- `ocr/`: Contains scripts for OCR preprocessing and extraction of collector numbers.
-- `utils/`: Utility scripts used for image processing and data handling.
+- `streamlit_app.py`: The main file to run the Streamlit app.
+- `packages.txt`: installs libgl1, a library that provides OpenGL functionality
+- `src/`: Directory containing core application code, modules, etc.
+- `documents/`: Contains initial proposal document
+- `notebooks/`: Contains notebook training of model (retrieving data set, creating data set, training, etc.)
 - `requirements.txt`: Contains a list of dependencies required to run the project.
 - `README.md`: Documentation for the project.
-- `data/`: (Optional) Directory for storing sample card images for testing purposes.
+- `data/`: Contains mandatory data files
+- `Superseded/`: Directory containing other notebooks and py code that was ultimately discarded
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
